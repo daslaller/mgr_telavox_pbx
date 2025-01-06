@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:math' as math;
 
-/*on retrieval of a new call this function should be used to update the corresponding incoming number from telavox:
+/*on retrieval of a new call this function should be used to update the corresponding incoming number from Telavox:
 mgrController.updatePhoneNumber('test');*/
 const WindowOptions windowOptions = WindowOptions(
-  size: Size(800, 600),
   center: false,
   backgroundColor: Colors.transparent,
   skipTaskbar: true,
@@ -17,16 +17,18 @@ const WindowOptions windowOptions = WindowOptions(
   alwaysOnTop: true,
 );
 
-// Create a global controller instance
+// Create a global controller instance, its accessible outside of the package
 final mgrController = MGRCallerController(
-  phoneNumber: '07912345678',
+  phoneNumber: generatePhoneNumber(),
   mgrUuid: 'your-mgr-uuid',
   onShow: () async {
-    await windowManager.show();
+    await updateWindowState(visible: true);
     print('Showing popup');
   },
   onClose: () async {
-    await windowManager.hide();
+    //await windowManager.hide();
+    await updateWindowState(visible: false);
+    //await windowManager.destroy();
     print('Hiding popup');
   },
 );
@@ -35,18 +37,24 @@ Future<void> initWindow() async {
   await windowManager.ensureInitialized();
   await Window.initialize();
   await Window.setEffect(
-    effect: WindowEffect.mica, // Apply Mica effect
-    dark: false, // Use light theme
-  );
-  showPop();
+      effect: WindowEffect.mica, // Apply Mica effect
+      //color: Colors.transparent,
+      dark: false // Use light theme
+      );
+  updateWindowState();
+  //showPop();
 }
 
-Future<void> showPop() async {
+updateWindowState({visible}) async {
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.setAsFrameless();
     await windowManager.setAlignment(Alignment.bottomRight);
-    await windowManager.show();
-    mgrController.showPopup();
+    await windowManager.setAsFrameless();
+    if (visible != null && visible == true) {
+      await windowManager.show();
+      await windowManager.setIgnoreMouseEvents(true);
+    } else {
+      await windowManager.hide();
+    }
   });
 }
 
@@ -58,20 +66,19 @@ Future<SystemTray> buildSystemTray() async {
     iconPath: 'assets/app_icon.ico', // Replace with out logo
   );
 
-  // Build context menu for the systemtray
+  // Build context menu for the system tray
   final Menu menu = Menu();
   await menu.buildFrom([
     MenuItemLabel(
       label: 'Show last call',
       onClicked: (_) async {
-        await showPop();
+        mgrController.showPopup();
       },
     ),
     MenuItemLabel(
       label: 'Exit',
       onClicked: (_) async {
         mgrController.hidePopup();
-        await windowManager.destroy();
         exit(0);
       },
     ),
@@ -87,9 +94,19 @@ Future<SystemTray> buildSystemTray() async {
   return systemTray;
 }
 
+// Test function for a phone-number
+String generatePhoneNumber() {
+  final random = math.Random();
+  return '07${random.nextInt(100).toString().padLeft(2, '0')} '
+      '${random.nextInt(1000).toString().padLeft(3, '0')} '
+      '${random.nextInt(1000).toString().padLeft(3, '0')}';
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initWindow();
-  buildSystemTray();
+  await buildSystemTray();
   runApp(fluentApp(mgrController));
+  mgrController.updatePhoneNumber('123');
+  mgrController.updatePhoneNumber('121');
 }

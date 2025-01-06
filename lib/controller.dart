@@ -1,8 +1,12 @@
 // mgr_caller_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:http/http.dart' as http;
+import 'package:mgr_telavox_pbx/beta%20implementation/repairshopr.dart';
 import 'dart:convert';
+
+import 'package:mgr_telavox_pbx/main.dart';
 
 String mgrPbxUrl = "";
 
@@ -27,13 +31,19 @@ class MGRCallerController {
   // Update phone number and trigger rebuild
   void updatePhoneNumber(String newPhoneNumber) {
     _phoneNumber = newPhoneNumber;
-    popupKey.currentState?.setState(() {/*_phoneNumber = newPhoneNumber;*/});
+    //  popupKey.currentState?.setState(() {
+    //    _phoneNumber = newPhoneNumber;
+    //  });
+    // Doesnt work as intended and doesnt seem to do anything, even though my interpretation is similair to that of the platform call in javaFX. It indeed doesnt work in that manner.
   }
 
   // Update MGR UUID and trigger rebuild
   void updateMgrUuid(String newUuid) {
     _mgrUuid = newUuid;
-    popupKey.currentState?.setState(() {});
+    //popupKey.currentState?.setState(() {
+    //  _mgrUuid = newUuid;
+    //});
+    // Doesnt work as intended and doesnt seem to do anything, even though my interpretation is similair to that of the platform call in javaFX. It indeed doesnt work in that manner.
   }
 
   // Manually trigger animations
@@ -56,6 +66,18 @@ class MGRCallerController {
   String get phoneNumber => _phoneNumber;
 
   String get mgrUuid => _mgrUuid;
+
+  VoidCallback? get onShow => _onShow;
+
+  set onShow(VoidCallback? value) {
+    _onShow = value;
+  }
+
+  VoidCallback? get onClose => _onClose;
+
+  set onClose(VoidCallback? value) {
+    _onClose = value;
+  }
 }
 
 class MGRCallerPopup extends StatefulWidget {
@@ -75,6 +97,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   Map<String, dynamic>? contactInfo;
   bool isLoading = true;
   String? errorMessage;
+  late Map rawData = {};
   late AnimationController animationController;
   late Animation<Offset> _slideAnimation;
 
@@ -106,34 +129,34 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     If you want the system to return any “Customer’s Custom Fields” data then you can send the custom field name in the “cf_name” parameter.
     https://www.mygadgetrepairs.com/external/pbx-call.cfm?uuid={uuid}&did=07912345678&type=json&cf_name=cf_70932*/
 
-  Future<void> _fetchMGRInformation() async {
+  Future<void> _fetchMGRInformation({returnData, uuid, phonenumber}) async {
+    if ((returnData ?? true) || (uuid ?? true) || (phonenumber ?? true)) {
+      print('cant retrieve mgr data without UUID and Phonenumber.');
+      isLoading = false;
+      return;
+    }
     try {
-      final String mgrUrl =
-          'https://www.mygadgetrepairs.com/external/pbx-call.cfm'
-          '?uuid=${widget.controller.mgrUuid}'
-          '&did=${widget.controller.phoneNumber}'
-          '&type=json';
-      mgrPbxUrl = mgrUrl; // Copy payload
+      isLoading = true;
 
-      final response = await http.get(Uri.parse(mgrUrl));
-
+      print('got mission to fetch');
+      final response = await http
+          .get(Uri.parse(mgrUrl(uuid: uuid, phonenumber: phonenumber)));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        returnData['rawdata'] = json.decode(response.body);
         setState(() {
-          contactInfo = data['contact'];
-          isLoading = false;
+          returnData['contact'] = rawData['contact'];
         });
       } else {
         setState(() {
-          errorMessage = 'No information found';
-          isLoading = false;
+          returnData['error'] = 'No information found, Responsecode != 200';
         });
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error retrieving information';
-        isLoading = false;
+        returnData['error'] = 'Error retrieving information';
       });
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -154,6 +177,8 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   }
 
   void _handleActionButton() {
+    // ugly way of testing update function
+    mgrController.updatePhoneNumber(generatePhoneNumber());
     if (contactInfo!['ticket_id'] != null) {
       _navigateToTicket(contactInfo!['ticket_id'].toString());
     } else if (contactInfo!['lead_id'] != null) {
@@ -225,10 +250,12 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
                 const SizedBox(height: 16),
                 if (isLoading)
                   const Center(child: fluent.ProgressRing())
-                else if (errorMessage != null)
+                else if (rawData['error'] != null)
                   _buildErrorState()
-                else
-                  _buildContent(),
+                else if (rawData['contact'] != null &&
+                    rawData['contact'].toString().isNotEmpty)
+                  contactInfo = rawData['contact'],
+                _buildContent(),
                 const SizedBox(height: 16),
                 _buildActionButton(),
               ],

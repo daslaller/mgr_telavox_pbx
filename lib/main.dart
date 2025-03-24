@@ -7,16 +7,6 @@ import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:math' as math;
 
-/*on retrieval of a new call this function should be used to update the corresponding incoming number from Telavox:
-mgrController.updatePhoneNumber('test');*/
-const WindowOptions windowOptions = WindowOptions(
-  center: false,
-  backgroundColor: Colors.transparent,
-  skipTaskbar: true,
-  titleBarStyle: TitleBarStyle.hidden,
-  alwaysOnTop: true,
-);
-
 // Create a global controller instance, its accessible outside of the package
 final mgrController = MGRCallerController(
   phoneNumber: generatePhoneNumber(),
@@ -32,31 +22,6 @@ final mgrController = MGRCallerController(
     print('Hiding popup');
   },
 );
-
-Future<void> initWindow() async {
-  await windowManager.ensureInitialized();
-  await Window.initialize();
-  await Window.setEffect(
-      effect: WindowEffect.mica, // Apply Mica effect
-      //color: Colors.transparent,
-      dark: false // Use light theme
-      );
-  updateWindowState();
-  //showPop();
-}
-
-updateWindowState({visible}) async {
-  await windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.setAlignment(Alignment.bottomRight);
-    await windowManager.setAsFrameless();
-    if (visible != null && visible == true) {
-      await windowManager.show();
-      await windowManager.setIgnoreMouseEvents(true);
-    } else {
-      await windowManager.hide();
-    }
-  });
-}
 
 // Building the system tray options
 Future<SystemTray> buildSystemTray() async {
@@ -102,11 +67,46 @@ String generatePhoneNumber() {
       '${random.nextInt(1000).toString().padLeft(3, '0')}';
 }
 
+Future<void> initWindow() async {
+  await windowManager.ensureInitialized();
+  await Window.initialize();
+  await Window.setEffect(
+      effect: WindowEffect.mica, // Apply Mica effect
+      //color: Colors.transparent,
+      dark: false // Use light theme
+      );
+  updateWindowState(visible: true);
+  //showPop();
+}
+
+updateWindowState({visible}) async {
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.setAlignment(Alignment.bottomRight);
+    await windowManager.setAsFrameless();
+    if (visible != null && visible == true) {
+      await windowManager.show();
+      //   await windowManager.setIgnoreMouseEvents(true);
+    } else {
+      await windowManager.hide();
+    }
+  });
+}
+
+/*on retrieval of a new call this function should be used to update the corresponding incoming number from Telavox:
+mgrController.updatePhoneNumber('test');*/
+WindowOptions windowOptions = WindowOptions(
+  size: windowSize,
+  center: false,
+  backgroundColor: Colors.transparent,
+  skipTaskbar: true,
+  titleBarStyle: TitleBarStyle.hidden,
+  alwaysOnTop: true,
+);
+Size windowSize = Size(350, 200);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initWindow();
   await buildSystemTray();
-  runApp(fluentApp(mgrController));
-  mgrController.updatePhoneNumber('123');
-  mgrController.updatePhoneNumber('121');
+  runApp(fluentApp(controller: mgrController, size: windowSize));
 }

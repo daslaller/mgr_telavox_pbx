@@ -32,6 +32,7 @@ dependencies:
   window_manager: ^0.4.3
   system_tray:
   http: ^1.2.2
+  system_theme:
   flutter:
     sdk: flutter
 

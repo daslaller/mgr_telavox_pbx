@@ -1,14 +1,19 @@
 // mgr_caller_controller.dart
 
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:http/http.dart' as http;
-import 'package:mgr_telavox_pbx/beta%20implementation/repairshopr.dart';
+import 'package:mgr_telavox_pbx/beta%20implementation/mygadgetrepairs/mygadgetrepairs.dart';
 import 'dart:convert';
 
 import 'package:mgr_telavox_pbx/main.dart';
+import 'package:window_manager/window_manager.dart';
 
-String mgrPbxUrl = "";
+/*Need to create a short description window, and to the left of
+ that window should be a picture of the device manufacturer. For say, its a Samsung S6,
+ then the image should be grabbed from the resource folder for a
+  galaxy s6 if not found an online resource should be used*/
 
 class MGRCallerController {
   final GlobalKey<MGRCallerPopupState> popupKey =
@@ -86,6 +91,7 @@ class MGRCallerPopup extends StatefulWidget {
   const MGRCallerPopup({
     super.key,
     required this.controller,
+    Size size = const Size(350, 200),
   });
 
   @override
@@ -97,6 +103,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   Map<String, dynamic>? contactInfo;
   bool isLoading = true;
   String? errorMessage;
+  MgrUrl mgrUrl = MgrUrl();
   late Map rawData = {};
   late AnimationController animationController;
   late Animation<Offset> _slideAnimation;
@@ -137,10 +144,10 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     }
     try {
       isLoading = true;
-
       print('got mission to fetch');
-      final response = await http
-          .get(Uri.parse(mgrUrl(uuid: uuid, phonenumber: phonenumber)));
+      final response = await http.get(
+          Uri.parse(mgrUrl.fetchMgrURL(uuid: uuid, phonenumber: phonenumber)));
+      print('last url: ${mgrUrl.lastURL}');
       if (response.statusCode == 200) {
         returnData['rawdata'] = json.decode(response.body);
         setState(() {
@@ -156,37 +163,57 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
         returnData['error'] = 'Error retrieving information';
       });
     } finally {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   String _getActionButtonText() {
-    if (contactInfo == null) return 'Create Customer';
+    if (contactInfo == null) return 'Hantera kund';
+    // Should follow the redirect link:
+    // https://www.mygadgetrepairs.com/external/pbx-call.cfm?uuid={your-uuid}&did={caller-did}&redirect=yes
+
     if (contactInfo!['ticket_id'] != null) return 'View Ticket';
     if (contactInfo!['lead_id'] != null) return 'View Lead';
     if (contactInfo!['id'] != null) return 'View Customer';
     return 'Create Customer';
   }
 
+  // These should color the ticket and lead button depending on the information found from webhook,
+  // if no information was found, the button shouldnt even exist.
   Color _getStatusColor() {
     final status = contactInfo?['status']?.toString().toLowerCase() ?? '';
-    if (status.contains('active')) return Colors.green;
-    if (status.contains('pending')) return Colors.orange;
-    if (status.contains('closed')) return Colors.grey;
-    return Colors.blue;
+    if (status.contains('active')) return fluent.Colors.green;
+    if (status.contains('pending')) return fluent.Colors.orange;
+    if (status.contains('closed')) return fluent.Colors.grey;
+    return fluent.Colors.blue;
   }
+
+// Everything should be displayed at once. So if we find a ticket id,
+// display that and some information gathered and a button to visit that
+// ticket, if a lead is found do the same and so on.
+// In the end it should be like a profile card of what is found and a button to each option their
+// is. Example:
+// Picture of the device if found - (Some information about the customer, recent tickets, leads etc.)
+  // button - Visit most recent ticket/active ticket, should be colored depending on status
+  // Button - Visit most recent lead, should be colored depending on status
+  // Button - Redirect button, is always shown in mica color.
 
   void _handleActionButton() {
     // ugly way of testing update function
-    mgrController.updatePhoneNumber(generatePhoneNumber());
     if (contactInfo!['ticket_id'] != null) {
+      // Should be changed to show essential ticket info and an option to go to that ticket
       _navigateToTicket(contactInfo!['ticket_id'].toString());
     } else if (contactInfo!['lead_id'] != null) {
+      // Should be changed to show what lead info there is and an option to go to that lead
       _navigateToLead(contactInfo!['lead_id'].toString());
     } else if (contactInfo!['id'] != null) {
+      // Unsure whats claude meant by ID.... need further exploration.
       _navigateToCustomer(contactInfo!['id'].toString());
     } else {
-      _handleIncomingCall(); // probably the only thing needed really
+      // This button is the only button thats always visible even if a nothing was found about the customer.
+      _redirectToFetchURL(); // probably the only thing needed really
       // https://www.mygadgetrepairs.com/external/pbx-call.cfm?uuid={your-uuid}&did={caller-did}&redirect=yes
       return;
     }
@@ -207,59 +234,53 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     // Implement actual navigation
   }
 
-  void _handleIncomingCall() {
+  void _redirectToFetchURL() {
     // follows mgr own implementation, which is to follow the pbx link with special
     // criteria
     print('Following MGR pbx link');
-    if (mgrPbxUrl.isNotEmpty) {
-      // code to go to this link
-      print('Navigating to $mgrPbxUrl');
-      return;
-    }
     print('Expired!');
     // Implement customer creation
   }
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      right: 16,
-      bottom: 16,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: Container(
-          width: 350,
+    return SlideTransition(
+      position: _slideAnimation,
+      child: fluent.Mica(
+        borderRadius: BorderRadius.circular(16),
+        child: fluent.Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            color: fluent.Colors.transparent,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
+                color: fluent.Colors.black.withOpacity(0.12),
+                blurRadius: 32,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: fluent.Card(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                if (isLoading)
-                  const Center(child: fluent.ProgressRing())
-                else if (rawData['error'] != null)
-                  _buildErrorState()
-                else if (rawData['contact'] != null &&
-                    rawData['contact'].toString().isNotEmpty)
-                  contactInfo = rawData['contact'],
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
+          width: 350,
+          height: 200,
+/*          child: fluent.Card(
+            backgroundColor: fluent.Colors.transparent,
+            padding: const EdgeInsets.all(8),*/
+          child: fluent.Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 16),
+              if (isLoading)
+                const Center(child: fluent.ProgressRing())
+              else if (errorMessage != null)
+                _buildErrorState()
+              else
                 _buildContent(),
-                const SizedBox(height: 16),
-                _buildActionButton(),
-              ],
-            ),
+              const SizedBox(height: 16),
+              _buildActionButton(),
+            ],
           ),
         ),
       ),
@@ -271,7 +292,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          'Incoming Call',
+          'Inkommande samtal',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -294,7 +315,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     return Center(
       child: Text(
         errorMessage!,
-        style: const TextStyle(color: Colors.red),
+        style: TextStyle(color: fluent.Colors.red),
       ),
     );
   }
@@ -304,12 +325,12 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInfoRow(
-          'Name',
-          contactInfo?['firstname'] ?? 'Unknown',
+          'Namn',
+          contactInfo?['firstname'] ?? 'Okänd',
           fluent.FluentIcons.contact,
         ),
         _buildInfoRow(
-          'Phone',
+          'Mobil',
           widget.controller.phoneNumber,
           fluent.FluentIcons.phone,
         ),
@@ -321,12 +342,12 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
           ),
         if (contactInfo?['company'] != null)
           _buildInfoRow(
-            'Company',
+            'Företag',
             contactInfo!['company'],
             fluent.FluentIcons.office_logo,
           ),
         if (contactInfo?['status'] != null)
-          Container(
+          fluent.Container(
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -361,13 +382,13 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.grey),
+          Icon(icon, size: 16, color: fluent.Colors.grey),
           const SizedBox(width: 8),
           Text(
             '$label: ',
             style: const TextStyle(
               fontWeight: FontWeight.w500,
-              color: Colors.grey,
+              color: fluent.Colors.grey,
             ),
           ),
           Expanded(
@@ -403,7 +424,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   }
 }
 
-class TransparentWindow extends StatefulWidget {
+/*class TransparentWindow extends StatefulWidget {
   final MGRCallerController controller;
 
   const TransparentWindow({
@@ -418,27 +439,28 @@ class TransparentWindow extends StatefulWidget {
 class _TransparentWindowState extends State<TransparentWindow> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          MGRCallerPopup(
-            key: widget.controller.popupKey,
-            controller: widget.controller,
-          ),
-        ],
-      ),
+    return Stack(
+      children: [
+        MGRCallerPopup(
+          key: widget.controller.popupKey,
+          controller: widget.controller,
+        ),
+      ],
     );
   }
-}
+}*/
 
-fluent.FluentApp fluentApp(MGRCallerController controller) {
+fluentApp({required controller, size, key}) {
   return fluent.FluentApp(
     // Return a usuable dressed widget, the widget structure looks something like this: Top-> TransparentWindow (invisible big window, houses the important popup) -> Visiblepop with childs
     theme: fluent.FluentThemeData(
       brightness: Brightness.light,
       accentColor: fluent.Colors.blue,
     ),
-    home: TransparentWindow(controller: controller),
+    home: MGRCallerPopup(
+      key: controller.popupKey,
+      controller: controller,
+      size: size,
+    ),
   );
 }

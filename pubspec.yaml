@@ -33,6 +33,10 @@ dependencies:
   system_tray:
   http: ^1.2.2
   system_theme:
+  logging:
+  tray_manager:
+  process_run:
+  path:
   flutter:
     sdk: flutter
 

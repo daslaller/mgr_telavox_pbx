@@ -1,11 +1,11 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'screens/main.dart';
-import 'screens/config_screen.dart';
-import 'services/config_service.dart';
+import '../v1/home_screen.dart';
+import '../v1/config_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,7 +55,7 @@ class _TelavoxMonitorAppState extends State<TelavoxMonitorApp> {
         home: NavigationView(
           appBar: NavigationAppBar(
             title: Text('Telavox Monitor'),
-            leading: Icon(FluentIcons.phone_transition),
+            leading: Icon(FluentIcons.phone),
           ),
           pane: NavigationPane(
             selected: _currentIndex,

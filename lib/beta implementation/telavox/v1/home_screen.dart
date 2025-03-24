@@ -1,7 +1,8 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
-import '../services/telavox_monitor.dart';
-import '../services/config_service.dart';
+import '../v1/telavox_monitor.dart';
+import '../v1/config_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

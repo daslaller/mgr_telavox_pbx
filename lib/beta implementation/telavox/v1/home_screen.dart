@@ -1,8 +1,9 @@
 // lib/screens/home_screen.dart
-import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
-import '../v1/telavox_monitor.dart';
-import '../v1/config_service.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:logging/logging.dart';
+import '../telavox_monitor.dart';
+import '../v2/config_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -58,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
       header: PageHeader(
         title: Text('Telavox Call Monitor'),
         commandBar: CommandBar(
-          items: [
+          primaryItems: [
             CommandBarButton(
               icon: Icon(FluentIcons.play),
               label: Text('Start Monitoring'),
@@ -76,8 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _activeCalls.length,
         itemBuilder: (context, index) {
           final call = _activeCalls[index];
-          return Card(
-            child: ListTile(
+          return fluent.Card(
+            child: fluent.ListTile(
               title: Text(call.phoneNumber),
               subtitle: Text('Extension: ${call.extensionName}'),
               trailing: Text(call.timestamp.toString()),

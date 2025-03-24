@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
+
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:tray_manager/tray_manager.dart';
 import '../v2/config_service.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +13,7 @@ void main() async {
   WindowOptions windowOptions = WindowOptions(
     size: Size(800, 600),
     center: true,
-    backgroundColor: fluent.Colors.transparent,
+    backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
     title: 'Telavox Monitor Configuration',
@@ -131,11 +130,11 @@ class _ConfigScreenState extends State<ConfigScreen> with WindowListener {
         actions: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            fluent.IconButton(
+            IconButton(
               icon: Icon(FluentIcons.chrome_minimize),
               onPressed: () async => await windowManager.minimize(),
             ),
-            fluent.IconButton(
+            IconButton(
               icon: Icon(FluentIcons.chrome_close),
               onPressed: () async => await windowManager.close(),
             ),
@@ -167,7 +166,7 @@ class _ConfigScreenState extends State<ConfigScreen> with WindowListener {
           padding: EdgeInsets.all(20),
           child: ListView(
             children: [
-              fluent.Card(
+              Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Column(
@@ -175,7 +174,7 @@ class _ConfigScreenState extends State<ConfigScreen> with WindowListener {
                     children: [
                       Text(
                         'Telavox API Settings',
-                        style: FluentTheme.of(context).typography.subtitle,
+                        style: FluentTheme.maybeOf(context)?.typography.display ?? TextStyle(),
                       ),
                       SizedBox(height: 20),
                       InfoLabel(
@@ -199,7 +198,7 @@ class _ConfigScreenState extends State<ConfigScreen> with WindowListener {
                 ),
               ),
               SizedBox(height: 20),
-              fluent.Card(
+              Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Column(
@@ -207,7 +206,7 @@ class _ConfigScreenState extends State<ConfigScreen> with WindowListener {
                     children: [
                       Text(
                         'Monitoring Settings',
-                        style: FluentTheme.of(context).typography.subtitle,
+                        style: FluentTheme.maybeOf(context)?.typography.subtitle ?? TextStyle(inherit: true),
                       ),
                       SizedBox(height: 20),
                       InfoLabel(

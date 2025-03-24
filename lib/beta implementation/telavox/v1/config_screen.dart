@@ -1,6 +1,6 @@
 // lib/screens/config_screen.dart
-import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import '../v1/config_service.dart';
 
 class ConfigScreen extends StatefulWidget {
@@ -44,7 +44,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
         title: Text('Configuration Saved'),
         content: Text('Your settings have been updated successfully.'),
         severity: InfoBarSeverity.success,
-        action: IconButton(
+        action: fluent.IconButton(
           icon: Icon(FluentIcons.clear),
           onPressed: close,
         ),
@@ -58,7 +58,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
       header: PageHeader(
         title: Text('Application Configuration'),
         commandBar: CommandBar(
-          items: [
+          primaryItems: [
             CommandBarButton(
               icon: Icon(FluentIcons.save),
               label: Text('Save Configuration'),

@@ -1,7 +1,7 @@
-// lib/screens/config_screen.dart
+// lib/screens/config_page.dart
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
-import 'package:fluent_ui/fluent_ui.dart' as fluent;
-import '../v1/config_service.dart';
+
+import 'config_page_controller.dart';
 
 class ConfigScreen extends StatefulWidget {
   @override
@@ -32,24 +32,41 @@ class _ConfigScreenState extends State<ConfigScreen> {
   }
 
   void _saveConfig() async {
-    await _configService.updateConfig(
-      jwtToken: _jwtTokenController.text,
-      baseUrl: _baseUrlController.text,
-      pollInterval: _pollInterval,
-      exemptionTime: _exemptionTime,
-    );
-    displayInfoBar(
-      context,
-      builder: (context, close) => InfoBar(
-        title: Text('Configuration Saved'),
-        content: Text('Your settings have been updated successfully.'),
-        severity: InfoBarSeverity.success,
-        action: fluent.IconButton(
-          icon: Icon(FluentIcons.clear),
-          onPressed: close,
+    try {
+      _configService.updateConfig(
+        jwtToken: _jwtTokenController.text,
+        baseUrl: _baseUrlController.text,
+        pollInterval: _pollInterval,
+        exemptionTime: _exemptionTime,
+      );
+      displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: Text('Configuration Saved'),
+          content: Text(
+              'Successfully saved file to: ${_configService.getConfigFile()}'),
+          severity: InfoBarSeverity.success,
+          action: IconButton(
+            icon: Icon(FluentIcons.clear),
+            onPressed: close,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      displayInfoBar(
+        context,
+        builder: (context, close) => InfoBar(
+          title: Text('Validation Error'),
+          content: Text('Failed to save configuration: ${e.toString()}'),
+          severity: InfoBarSeverity.error,
+          action: IconButton(
+            icon: Icon(FluentIcons.clear),
+            onPressed: close,
+          ),
+        ),
+      );
+      return;
+    }
   }
 
   @override

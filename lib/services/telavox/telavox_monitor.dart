@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import 'v2/config_service.dart';
+import '../../pages/config/config_page_controller.dart';
 
 // Define a class to hold call information
 class CallData {

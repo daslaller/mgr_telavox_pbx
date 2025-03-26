@@ -7,15 +7,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mgr_telavox_pbx/controller.dart';
-import 'package:mgr_telavox_pbx/main.dart';
+import 'package:mgr_telavox_pbx/pages/home/home_page.dart';
+import 'package:mgr_telavox_pbx/services/run.dart';
 //import 'package:mgr_telavox_pbx/widgets.dart';
 
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(fluentApp(controller: mgrController));
+
+    await tester.pumpWidget(MGRCallerPopup(controller: mgrController));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

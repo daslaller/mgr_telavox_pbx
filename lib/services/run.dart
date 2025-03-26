@@ -1,7 +1,9 @@
 import 'dart:io';
-import 'controller.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:mgr_telavox_pbx/pages/config/config_page.dart';
 
-import 'package:flutter/material.dart';
+import '../pages/home/home_page.dart';
+
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -108,5 +110,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initWindow();
   await buildSystemTray();
-  runApp(fluentApp(controller: mgrController, size: windowSize));
+  runApp(FluentApp(
+    title: 'MobilX Call Handler',
+    initialRoute: '/home.page',
+    routes: {
+      '/home.page': (context) => MGRCallerPopup(
+            controller: mgrController,
+            key: mgrController.popupKey,
+            size: windowSize,
+          ),
+      '/config.page': (context) => ConfigScreen(),
+    },
+    theme: FluentThemeData(
+      brightness: Brightness.light,
+      accentColor: Colors.blue,
+    ),
+  ));
 }

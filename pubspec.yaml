@@ -28,7 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  fluent_ui: ^4.9.2
+  fluent_ui:
   window_manager: ^0.4.3
   system_tray:
   http: ^1.2.2

@@ -1,14 +1,10 @@
 // mgr_caller_controller.dart
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/material.dart';
-import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:http/http.dart' as http;
-import 'package:mgr_telavox_pbx/beta%20implementation/mygadgetrepairs/mygadgetrepairs.dart';
+import 'package:mgr_telavox_pbx/services/mygadgetrepairs/mygadgetrepairs.dart';
 import 'dart:convert';
 
-import 'package:mgr_telavox_pbx/main.dart';
-import 'package:window_manager/window_manager.dart';
 
 /*Need to create a short description window, and to the left of
  that window should be a picture of the device manufacturer. For say, its a Samsung S6,
@@ -184,10 +180,10 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   // if no information was found, the button shouldnt even exist.
   Color _getStatusColor() {
     final status = contactInfo?['status']?.toString().toLowerCase() ?? '';
-    if (status.contains('active')) return fluent.Colors.green;
-    if (status.contains('pending')) return fluent.Colors.orange;
-    if (status.contains('closed')) return fluent.Colors.grey;
-    return fluent.Colors.blue;
+    if (status.contains('active')) return Colors.green;
+    if (status.contains('pending')) return Colors.orange;
+    if (status.contains('closed')) return Colors.grey;
+    return Colors.blue;
   }
 
 // Everything should be displayed at once. So if we find a ticket id,
@@ -246,14 +242,14 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   Widget build(BuildContext context) {
     return SlideTransition(
       position: _slideAnimation,
-      child: fluent.Mica(
+      child: Mica(
         borderRadius: BorderRadius.circular(16),
-        child: fluent.Container(
+        child: Container(
           decoration: BoxDecoration(
-            color: fluent.Colors.transparent,
+            color: Colors.transparent,
             boxShadow: [
               BoxShadow(
-                color: fluent.Colors.black.withOpacity(0.12),
+                color: Colors.black.withOpacity(0.12),
                 blurRadius: 32,
                 offset: const Offset(0, 4),
               ),
@@ -266,14 +262,14 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
 /*          child: fluent.Card(
             backgroundColor: fluent.Colors.transparent,
             padding: const EdgeInsets.all(8),*/
-          child: fluent.Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
               const SizedBox(height: 16),
               if (isLoading)
-                const Center(child: fluent.ProgressRing())
+                const Center(child: ProgressRing())
               else if (errorMessage != null)
                 _buildErrorState()
               else
@@ -298,8 +294,8 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
             fontWeight: FontWeight.bold,
           ),
         ),
-        fluent.IconButton(
-          icon: const Icon(fluent.FluentIcons.chrome_close),
+        IconButton(
+          icon: const Icon(FluentIcons.chrome_close),
           onPressed: () {
             animationController.reverse().then((_) {
               widget.controller._onClose?.call();
@@ -315,7 +311,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     return Center(
       child: Text(
         errorMessage!,
-        style: TextStyle(color: fluent.Colors.red),
+        style: TextStyle(color: Colors.red),
       ),
     );
   }
@@ -327,27 +323,27 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
         _buildInfoRow(
           'Namn',
           contactInfo?['firstname'] ?? 'Okänd',
-          fluent.FluentIcons.contact,
+          FluentIcons.contact,
         ),
         _buildInfoRow(
           'Mobil',
           widget.controller.phoneNumber,
-          fluent.FluentIcons.phone,
+          FluentIcons.phone,
         ),
         if (contactInfo?['email'] != null)
           _buildInfoRow(
             'Email',
             contactInfo!['email'],
-            fluent.FluentIcons.mail,
+            FluentIcons.mail,
           ),
         if (contactInfo?['company'] != null)
           _buildInfoRow(
             'Företag',
             contactInfo!['company'],
-            fluent.FluentIcons.office_logo,
+            FluentIcons.office_logo,
           ),
         if (contactInfo?['status'] != null)
-          fluent.Container(
+          Container(
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -358,7 +354,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  fluent.FluentIcons.status_circle_sync,
+                  FluentIcons.status_circle_sync,
                   size: 12,
                   color: _getStatusColor(),
                 ),
@@ -382,13 +378,13 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: fluent.Colors.grey),
+          Icon(icon, size: 16, color: Colors.grey),
           const SizedBox(width: 8),
           Text(
             '$label: ',
             style: const TextStyle(
               fontWeight: FontWeight.w500,
-              color: fluent.Colors.grey,
+              color: Colors.grey,
             ),
           ),
           Expanded(
@@ -409,7 +405,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   Widget _buildActionButton() {
     return SizedBox(
       width: double.infinity,
-      child: fluent.FilledButton(
+      child: FilledButton(
         onPressed: _handleActionButton,
         child: Text(_getActionButtonText()),
       ),
@@ -424,43 +420,5 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
   }
 }
 
-/*class TransparentWindow extends StatefulWidget {
-  final MGRCallerController controller;
 
-  const TransparentWindow({
-    super.key,
-    required this.controller,
-  });
 
-  @override
-  State<TransparentWindow> createState() => _TransparentWindowState();
-}
-
-class _TransparentWindowState extends State<TransparentWindow> {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        MGRCallerPopup(
-          key: widget.controller.popupKey,
-          controller: widget.controller,
-        ),
-      ],
-    );
-  }
-}*/
-
-fluentApp({required controller, size, key}) {
-  return fluent.FluentApp(
-    // Return a usuable dressed widget, the widget structure looks something like this: Top-> TransparentWindow (invisible big window, houses the important popup) -> Visiblepop with childs
-    theme: fluent.FluentThemeData(
-      brightness: Brightness.light,
-      accentColor: fluent.Colors.blue,
-    ),
-    home: MGRCallerPopup(
-      key: controller.popupKey,
-      controller: controller,
-      size: size,
-    ),
-  );
-}

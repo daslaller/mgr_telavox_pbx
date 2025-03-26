@@ -1,4 +1,4 @@
-// lib/services/config_service.dart
+// lib/services/config_page_controller.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
@@ -19,14 +19,14 @@ class Config {
   });
 
   Map<String, dynamic> toJson() => {
-    'credentials': {'jwt_token': jwtToken},
-    'settings': {
-      'base_url': baseUrl,
-      'poll_interval': pollInterval,
-      'exemption_time': exemptionTime,
-    },
-    'recent_calls': recentCalls ?? {},
-  };
+        'credentials': {'jwt_token': jwtToken},
+        'settings': {
+          'base_url': baseUrl,
+          'poll_interval': pollInterval,
+          'exemption_time': exemptionTime,
+        },
+        'recent_calls': recentCalls ?? {},
+      };
 
   // Create a new Config with updated values while preserving other fields
   Config copyWith({
@@ -40,7 +40,7 @@ class Config {
       baseUrl: baseUrl ?? this.baseUrl,
       pollInterval: pollInterval ?? this.pollInterval,
       exemptionTime: exemptionTime ?? this.exemptionTime,
-      recentCalls: this.recentCalls,
+      recentCalls: recentCalls,
     );
   }
 }
@@ -48,15 +48,20 @@ class Config {
 class ConfigService {
   File get _configFile {
     final appDir = Directory(path.join(
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '.',
-        '.telavox-monitor'
-    ));
+        Platform.environment['HOME'] ??
+            Platform.environment['USERPROFILE'] ??
+            '.',
+        '.telavox-monitor'));
 
     if (!appDir.existsSync()) {
       appDir.createSync(recursive: true);
     }
 
     return File(path.join(appDir.path, 'config.json'));
+  }
+
+  getConfigFile() {
+    return _configFile;
   }
 
   Future<Config> loadConfig() async {
@@ -97,8 +102,6 @@ class ConfigService {
     );
 
     await _configFile.writeAsString(
-        JsonEncoder.withIndent('  ').convert(newConfig.toJson())
-    );
+        JsonEncoder.withIndent('  ').convert(newConfig.toJson()));
   }
 }
-

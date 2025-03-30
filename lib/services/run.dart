@@ -15,31 +15,30 @@ WindowOptions windowOptions = WindowOptions(
   titleBarStyle: TitleBarStyle.hidden,
   alwaysOnTop: true,
 );
-
+ResourceDictionary resources = ResourceDictionary.dark();
 FluentApp fluentMainApp = FluentApp(
-  title: 'MobilX Call Handler',
-  initialRoute: '/home.page',
-  routes: {
-    '/home.page': (context) => MGRCallerPopup(
-          onClose: () async {
-            await windowManager.hide();
-            print('Closing window ${await windowManager.isVisible()}');
-          },
-          onShow: () async {
-            windowManager.show;
-            print('Showing window ${await windowManager.isVisible()}' );
-          },
-          size: windowSize,
-          phoneNumber: generatePhoneNumber(),
-          mgrUuid: " ",
-        ),
-    '/config.page': (context) => ConfigScreen(),
-  },
-  theme: FluentThemeData(
-    brightness: Brightness.light,
-    accentColor: Colors.blue,
-  ),
-);
+    title: 'MobilX Call Handler',
+    initialRoute: '/home.page',
+    routes: {
+      '/home.page': (context) => MGRCallerPopup(
+            onClose: () async {
+              await windowManager.hide();
+              print('Closing window ${await windowManager.isVisible()}');
+            },
+            onShow: () async {
+              windowManager.show;
+              print('Showing window ${await windowManager.isVisible()}');
+            },
+            size: windowSize,
+            phoneNumber: generatePhoneNumber(),
+            mgrUuid: " ",
+          ),
+      '/config.page': (context) => ConfigScreen(),
+    },
+    theme: FluentThemeData(
+      brightness: Brightness.light,
+      accentColor: Colors.blue,
+    ));
 // Test function for a phone-number
 String generatePhoneNumber() {
   final random = math.Random();
@@ -55,10 +54,8 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
   await Window.initialize();
   await Window.setEffect(
-      effect: WindowEffect.mica, // Apply Mica effect
-      //color: Colors.transparent,
-      dark: false // Use light theme
-      );
+    effect: WindowEffect.mica, // Apply Mica effect
+  );
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.setAlignment(Alignment.bottomRight);
     await windowManager.setAsFrameless();

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import '../../pages/config/config_page_controller.dart';
+import '../../pages/config/config.dart';
 
 // Define a class to hold call information
 class CallData {
@@ -42,7 +42,7 @@ enum TelavoxEvent {
 }
 
 class TelavoxMonitor {
-  final Config config;
+  final ConfigModel config;
   final Logger logger;
   Timer? _pollTimer;
   final Map<String, DateTime> _recentCalls = {};
@@ -155,7 +155,7 @@ class TelavoxMonitor {
 // Example usage in another project:
 void exampleUsage() async {
   //File('path/to/config.json')
-  final config = Config();
+  final config = ConfigModel();
   final logger = Logger('TelavoxMonitor');
   final monitor = TelavoxMonitor(config: config, logger: logger);
 

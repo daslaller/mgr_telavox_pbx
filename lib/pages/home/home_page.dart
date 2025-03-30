@@ -1,17 +1,19 @@
 // mgr_caller_controller.dart
 
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:mgr_telavox_pbx/services/mygadgetrepairs/mygadgetrepairs.dart';
 import 'dart:convert';
-
+import 'package:system_tray/system_tray.dart';
 
 /*Need to create a short description window, and to the left of
  that window should be a picture of the device manufacturer. For say, its a Samsung S6,
  then the image should be grabbed from the resource folder for a
   galaxy s6 if not found an online resource should be used*/
 
-class MGRCallerController {
+/*class MGRCallerController {
   final GlobalKey<MGRCallerPopupState> popupKey =
       GlobalKey<MGRCallerPopupState>();
   String _phoneNumber;
@@ -47,22 +49,6 @@ class MGRCallerController {
     // Doesnt work as intended and doesnt seem to do anything, even though my interpretation is similair to that of the platform call in javaFX. It indeed doesnt work in that manner.
   }
 
-  // Manually trigger animations
-  void showPopup() {
-    popupKey.currentState?.animationController.forward();
-    _onShow?.call();
-  }
-
-  void hidePopup() {
-    popupKey.currentState?.animationController.reverse();
-    _onClose?.call();
-  }
-
-  // Refresh MGR information
-  void refreshInfo() {
-    popupKey.currentState?._fetchMGRInformation();
-  }
-
   // Getters for current values
   String get phoneNumber => _phoneNumber;
 
@@ -79,15 +65,23 @@ class MGRCallerController {
   set onClose(VoidCallback? value) {
     _onClose = value;
   }
-}
+}*/
 
 class MGRCallerPopup extends StatefulWidget {
-  final MGRCallerController controller;
+  // final MGRCallerController controller;
+  final VoidCallback? onClose;
+  final VoidCallback? onShow;
+  final dynamic mgrUuid;
+  final dynamic phoneNumber;
 
   const MGRCallerPopup({
     super.key,
-    required this.controller,
+    // required this.controller,
     Size size = const Size(350, 200),
+    this.onClose,
+    this.onShow,
+    required this.mgrUuid,
+    required this.phoneNumber,
   });
 
   @override
@@ -106,9 +100,70 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
 
   @override
   void initState() {
-    super.initState();
+    _buildSystemTray();
     _setupAnimations();
     _fetchMGRInformation();
+    super.initState();
+  }
+
+  // Manually trigger animations
+  void showPopup() {
+    setState(() {
+      animationController.forward().then((value) async {
+        widget.onShow?.call();
+        print('successful pop');
+      });
+    });
+  }
+
+  void hidePopup() {
+    setState(() {
+      animationController.reverse().then((value) async {
+        widget.onClose?.call();
+        print('Successful hide');
+      });
+    });
+  }
+
+  // Refresh MGR information
+  void refreshInfo() {
+    _fetchMGRInformation();
+  }
+
+// Building the system tray options
+  Future<SystemTray> _buildSystemTray() async {
+    final SystemTray systemTray = SystemTray();
+    await systemTray.initSystemTray(
+      title: "MGR Caller",
+      iconPath: 'assets/app_icon.ico', // Replace with out logo
+    );
+    print('initiated systemtray');
+    // Build context menu for the system tray
+    final Menu menu = Menu();
+    await menu.buildFrom([
+      MenuItemLabel(
+        label: 'Show last call',
+        onClicked: (_) async {
+          showPopup();
+        },
+      ),
+      MenuItemLabel(
+        label: 'Exit',
+        onClicked: (_) async {
+          hidePopup();
+          exit(0);
+        },
+      ),
+    ]);
+
+    systemTray.registerSystemTrayEventHandler((eventName) {
+      if (eventName.contains(kSystemTrayEventRightClick)) {
+        systemTray.popUpContextMenu();
+      }
+    });
+
+    await systemTray.setContextMenu(menu);
+    return systemTray;
   }
 
   void _setupAnimations() {
@@ -297,10 +352,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
         IconButton(
           icon: const Icon(FluentIcons.chrome_close),
           onPressed: () {
-            animationController.reverse().then((_) {
-              widget.controller._onClose?.call();
-              print('exit was pressed on icon button');
-            });
+            hidePopup();
           },
         ),
       ],
@@ -327,7 +379,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
         ),
         _buildInfoRow(
           'Mobil',
-          widget.controller.phoneNumber,
+          widget.phoneNumber,
           FluentIcons.phone,
         ),
         if (contactInfo?['email'] != null)
@@ -419,6 +471,3 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     super.dispose();
   }
 }
-
-
-

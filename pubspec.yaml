@@ -29,7 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   fluent_ui:
-  window_manager: ^0.4.3
+  window_manager_plus:
   system_tray:
   http: ^1.2.2
   system_theme:

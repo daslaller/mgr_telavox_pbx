@@ -12,7 +12,7 @@
 #include <system_theme/system_theme_plugin.h>
 #include <system_tray/system_tray_plugin.h>
 #include <tray_manager/tray_manager_plugin.h>
-#include <window_manager/window_manager_plugin.h>
+#include <window_manager_plus/window_manager_plus_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   BitsdojoWindowPluginRegisterWithRegistrar(
@@ -27,6 +27,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("SystemTrayPlugin"));
   TrayManagerPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("TrayManagerPlugin"));
-  WindowManagerPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("WindowManagerPlugin"));
+  WindowManagerPlusPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("WindowManagerPlusPlugin"));
 }

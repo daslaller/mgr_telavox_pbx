@@ -3,8 +3,16 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart' hide Colors;
 import 'package:path/path.dart' as path;
 
+import '../../services/run.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(configApp);
+}
+
 class ConfigScreen extends StatefulWidget {
-  const ConfigScreen({super.key});
+
+  const ConfigScreen( {super.key});
 
   @override
   ConfigScreenState createState() => ConfigScreenState();
@@ -36,14 +44,14 @@ class ConfigModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'credentials': {'jwt_token': jwtToken},
-    'settings': {
-      'base_url': baseUrl,
-      'poll_interval': pollInterval,
-      'exemption_time': exemptionTime,
-    },
-    'recent_calls': recentCalls ?? {},
-  };
+        'credentials': {'jwt_token': jwtToken},
+        'settings': {
+          'base_url': baseUrl,
+          'poll_interval': pollInterval,
+          'exemption_time': exemptionTime,
+        },
+        'recent_calls': recentCalls ?? {},
+      };
 
   ConfigModel copyWith({
     String? jwtToken,
@@ -166,7 +174,8 @@ class ConfigScreenState extends State<ConfigScreen> {
         context,
         builder: (context, close) => InfoBar(
           title: const Text('Configuration Saved'),
-          content: Text('Successfully saved file to: ${_configService.configFile.path}'),
+          content: Text(
+              'Successfully saved file to: ${_configService.configFile.path}'),
           severity: InfoBarSeverity.success,
           action: IconButton(
             icon: const Icon(FluentIcons.clear),

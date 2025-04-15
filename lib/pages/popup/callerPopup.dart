@@ -74,14 +74,16 @@ class MGRCallerPopup extends StatefulWidget {
   final dynamic mgrUuid;
   final dynamic phoneNumber;
 
+  //final Size size;
+
   const MGRCallerPopup({
     super.key,
     // required this.controller,
-    Size size = const Size(350, 200),
     this.onClose,
     this.onShow,
-    required this.mgrUuid,
-    required this.phoneNumber,
+    this.mgrUuid,
+    this.phoneNumber,
+    // required this.size,
   });
 
   @override
@@ -373,26 +375,26 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInfoRow(
-          'Namn',
-          contactInfo?['firstname'] ?? 'Okänd',
-          FluentIcons.contact,
+         label:  'Namn',
+         value:  contactInfo?['firstname'] ?? 'Okänd',
+         icon:  FluentIcons.contact,
         ),
         _buildInfoRow(
-          'Mobil',
-          widget.phoneNumber,
-          FluentIcons.phone,
+          label: 'Mobil',
+          value: widget.phoneNumber,
+          icon: FluentIcons.phone,
         ),
         if (contactInfo?['email'] != null)
           _buildInfoRow(
-            'Email',
-            contactInfo!['email'],
-            FluentIcons.mail,
+            label: 'Email',
+            value: contactInfo!['email'],
+            icon: FluentIcons.mail,
           ),
         if (contactInfo?['company'] != null)
           _buildInfoRow(
-            'Företag',
-            contactInfo!['company'],
-            FluentIcons.office_logo,
+           label:  'Företag',
+           value:  contactInfo!['company'],
+           icon:  FluentIcons.office_logo,
           ),
         if (contactInfo?['status'] != null)
           Container(
@@ -425,7 +427,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
+  Widget _buildInfoRow({String? label, String? value, IconData? icon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -441,7 +443,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
           ),
           Expanded(
             child: Text(
-              value,
+              '$value: ',
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
               ),

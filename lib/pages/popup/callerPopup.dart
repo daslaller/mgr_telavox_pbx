@@ -1,12 +1,10 @@
 // mgr_caller_controller.dart
 
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:mgr_telavox_pbx/services/mygadgetrepairs/mygadgetrepairs.dart';
 import 'dart:convert';
-import 'package:system_tray/system_tray.dart';
 
 /*Need to create a short description window, and to the left of
  that window should be a picture of the device manufacturer. For say, its a Samsung S6,
@@ -102,7 +100,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
 
   @override
   void initState() {
-    _buildSystemTray();
+   // _buildSystemTray();
     _setupAnimations();
     _fetchMGRInformation();
     super.initState();
@@ -132,41 +130,7 @@ class MGRCallerPopupState extends State<MGRCallerPopup>
     _fetchMGRInformation();
   }
 
-// Building the system tray options
-  Future<SystemTray> _buildSystemTray() async {
-    final SystemTray systemTray = SystemTray();
-    await systemTray.initSystemTray(
-      title: "MGR Caller",
-      iconPath: 'assets/app_icon.ico', // Replace with out logo
-    );
-    print('initiated systemtray');
-    // Build context menu for the system tray
-    final Menu menu = Menu();
-    await menu.buildFrom([
-      MenuItemLabel(
-        label: 'Show last call',
-        onClicked: (_) async {
-          showPopup();
-        },
-      ),
-      MenuItemLabel(
-        label: 'Exit',
-        onClicked: (_) async {
-          hidePopup();
-          exit(0);
-        },
-      ),
-    ]);
 
-    systemTray.registerSystemTrayEventHandler((eventName) {
-      if (eventName.contains(kSystemTrayEventRightClick)) {
-        systemTray.popUpContextMenu();
-      }
-    });
-
-    await systemTray.setContextMenu(menu);
-    return systemTray;
-  }
 
   void _setupAnimations() {
     animationController = AnimationController(
